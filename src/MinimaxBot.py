@@ -2,14 +2,17 @@ from re import L
 from Bot import Bot
 from GameAction import GameAction
 from GameState import GameState
-import numpy as np
+from time import time
 
 class MinimaxBot(Bot):
-    def get_action(self, state: GameState) -> GameAction:
+    def __init__(self, is_player1: bool):
+        self.is_player1 = is_player1 # True jika bot adalah player 1
 
-        a = self.minimax(state, True, -9999, 9999)
-        print(a)
-        return None # TO DO: return action yg akan dilakukan
+    def get_action(self, state: GameState) -> GameAction:
+        is_maximize = False
+        if (self.is_player1):
+            is_maximize = True
+        return self.minimax(state, is_maximize, -9999, 9999, True)[1]
 
     def utility_function(self, state: GameState) -> int:
         # fungsi utilitas: jumlah box player 1 - jumlah box player 2
@@ -27,7 +30,10 @@ class MinimaxBot(Bot):
                 elif (state.board_status[y,x] == 4): # box milik player 2
                     p2_total_boxes += 1
         
-        return p1_total_boxes - p2_total_boxes
+        if (self.is_player1):
+            return p1_total_boxes - p2_total_boxes
+        else:
+            return p2_total_boxes - p1_total_boxes
 
     def terminal_test(self, state: GameState) -> bool:
         # fungsi untuk mengecek apakah state sudah terminal
@@ -61,7 +67,6 @@ class MinimaxBot(Bot):
     def get_state_from_action(self, state: GameState, action: GameAction) -> GameState:
         # fungsi untuk menghasilkan state dari sebuah aksi yang dilakukan
         # berdasarkan fungsi update_board dari main.py
-        
         new_state = GameState(state.board_status.copy(), state.row_status.copy(), state.col_status.copy(), state.player1_turn) # copy dari current game state
 
         point_scored = False
@@ -94,38 +99,48 @@ class MinimaxBot(Bot):
                 if abs(new_state.board_status[y,x-1]) == 4:
                     point_scored = True
         
-        if (not(point_scored)):
-            new_state.player1_turn = False
+        if ((new_state.player1_turn and point_scored) or (not(new_state.player1_turn) and not(point_scored))):
+            return new_state._replace(player1_turn = True)
+        else:
+            return new_state._replace(player1_turn = False)
 
-        return new_state
 
-    def minimax(self, state: GameState, is_maximize: bool, alpha: int, beta: int, depth: int = 0):
+    def minimax(self, state: GameState, is_maximize: bool, alpha: int, beta: int, first_call: bool, start_time: int = 0):
         # fungsi algoritma minimax, mengembalikan aksi terbaik yang dapat dilakukan
 
-        # TO DO: dapatkan action terbaik sehingga yg direturn bukan nilainya tapi action-nya
+        if (first_call):
+            start_time = time()
 
-        # start_time = time()
+        if (self.terminal_test(state) or time() - start_time > 5):
+            # print(time() - start_time)
+            return self.utility_function(state), None 
 
-        # if (time() - start_time > 5):
-        #     return self.get_possible_actions(state)[0]
-        # print("DEPTH: ", depth)
-
-        if (self.terminal_test(state)):
-            return self.utility_function(state) # TO DO: jadiin return action
-
+        
         if (is_maximize):
-            v = -9999
+            best_action = None
+            best_value = -9999
             for action in (self.get_possible_actions(state)):
-                v = max(v, self.minimax(self.get_state_from_action(state, action), False, alpha, beta, depth + 1))
+                v = self.minimax(self.get_state_from_action(state, action), False, alpha, beta, False, start_time)[0]
+                best_value = max(v, best_value)
+                if (best_value == v):
+                    best_action = action
                 alpha = max(alpha, v)
                 if (beta <= alpha):
                     break
-            return v # TO DO: jadiin return action
+            print("Best Value: ", best_value)
+            print("Best Action: ", best_action, "\n")
+            return best_value, best_action
         else:
-            v = 9999
+            worst_action = None
+            worst_value = 9999
             for action in (self.get_possible_actions(state)):
-                v = min(v, self.minimax(self.get_state_from_action(state, action), True, alpha, beta, depth + 1))
+                v = self.minimax(self.get_state_from_action(state, action), True, alpha, beta, False, start_time)[0]
+                worst_value = min(v, worst_value)
+                if (worst_value == v):
+                    best_action = action
                 beta = min(beta, v)
                 if (beta <= alpha):
                     break
-            return v # TO DO: jadiin return action
+            print("Worst Value: ", worst_value)
+            print("Worst Action: ", best_action, "\n")
+            return worst_value, worst_action
