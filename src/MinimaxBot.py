@@ -1,4 +1,3 @@
-from re import L
 from Bot import Bot
 from GameAction import GameAction
 from GameState import GameState
@@ -9,10 +8,7 @@ class MinimaxBot(Bot):
         self.is_player1 = is_player1 # True jika bot adalah player 1
 
     def get_action(self, state: GameState) -> GameAction:
-        is_maximize = False
-        if (self.is_player1):
-            is_maximize = True
-        return self.minimax(state, is_maximize, -9999, 9999, True)[1]
+        return self.minimax(state, True, -9999, 9999, True)[1]
 
     def utility_function(self, state: GameState) -> int:
         # fungsi utilitas: jumlah box player 1 - jumlah box player 2
