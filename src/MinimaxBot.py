@@ -135,9 +135,9 @@ class MinimaxBot(Bot):
             worst_value = 9999
             for action in (self.get_possible_actions(state)):
                 new_state, point_scored = self.get_state_from_action(state, action)
-                maximize = False
+                maximize = True
                 if (point_scored):
-                    maximize = True
+                    maximize = False
                 v = self.minimax(new_state, maximize, alpha, beta, False, start_time)[0]
                 worst_value = min(v, worst_value)
                 if (worst_value == v):
