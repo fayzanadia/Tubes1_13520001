@@ -95,10 +95,11 @@ class MinimaxBot(Bot):
                 if abs(new_state.board_status[y,x-1]) == 4:
                     point_scored = True
         
-        if ((new_state.player1_turn and point_scored) or (not(new_state.player1_turn) and not(point_scored))):
-            return new_state._replace(player1_turn = True)
-        else:
-            return new_state._replace(player1_turn = False)
+        # if ((new_state.player1_turn and point_scored) or (not(new_state.player1_turn) and not(point_scored))):
+        #     return new_state._replace(player1_turn = True)
+        # else:
+        #     return new_state._replace(player1_turn = False)
+        return new_state, point_scored
 
 
     def minimax(self, state: GameState, is_maximize: bool, alpha: int, beta: int, first_call: bool, start_time: int = 0):
@@ -111,12 +112,15 @@ class MinimaxBot(Bot):
             # print(time() - start_time)
             return self.utility_function(state), None 
 
-        
         if (is_maximize):
             best_action = None
             best_value = -9999
             for action in (self.get_possible_actions(state)):
-                v = self.minimax(self.get_state_from_action(state, action), False, alpha, beta, False, start_time)[0]
+                new_state, point_scored = self.get_state_from_action(state, action)
+                maximize = False
+                if (point_scored):
+                    maximize = True
+                v = self.minimax(new_state, maximize, alpha, beta, False, start_time)[0]
                 best_value = max(v, best_value)
                 if (best_value == v):
                     best_action = action
@@ -130,7 +134,11 @@ class MinimaxBot(Bot):
             worst_action = None
             worst_value = 9999
             for action in (self.get_possible_actions(state)):
-                v = self.minimax(self.get_state_from_action(state, action), True, alpha, beta, False, start_time)[0]
+                new_state, point_scored = self.get_state_from_action(state, action)
+                maximize = False
+                if (point_scored):
+                    maximize = True
+                v = self.minimax(new_state, maximize, alpha, beta, False, start_time)[0]
                 worst_value = min(v, worst_value)
                 if (worst_value == v):
                     best_action = action
