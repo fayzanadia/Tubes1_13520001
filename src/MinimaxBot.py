@@ -94,11 +94,6 @@ class MinimaxBot(Bot):
                 new_state.board_status[y,x-1] = (abs(new_state.board_status[y,x-1]) + 1) * player_modifier
                 if abs(new_state.board_status[y,x-1]) == 4:
                     point_scored = True
-        
-        # if ((new_state.player1_turn and point_scored) or (not(new_state.player1_turn) and not(point_scored))):
-        #     return new_state._replace(player1_turn = True)
-        # else:
-        #     return new_state._replace(player1_turn = False)
         return new_state, point_scored
 
 
