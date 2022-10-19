@@ -5,6 +5,8 @@ import random
 import numpy as np
 
 class LocalSearchBot(Bot): 
+    def __init__(self, is_player1: bool):
+        self.is_player1 = is_player1 # True jika bot adalah player 1
     
     def get_action(self, state: GameState) -> GameAction:
         all_row_marked = np.all(state.row_status == 1)
@@ -15,41 +17,38 @@ class LocalSearchBot(Bot):
 #        else:
 #            return self.get_random_row_action(state)
 
-    def get_random_action(self, state: GameState) -> GameAction:
+    def get_random_action(self, poss_act: list) -> GameAction:
+        position = random.randrange(0, len(poss_act))
+        y, x = poss_act[position]
+        return GameAction
+        '''
         all_row_marked = np.all(state.row_status == 1)
         all_col_marked = np.all(state.col_status == 1)
-
+        row_coord = self.get_row_neighbours(state)
+        col_coord = self.get_col_neighbours(strate)
+        
         if not (all_row_marked or all_col_marked):
             if random.random() < 0.5:
-                return self.get_random_row_action(state)
+                return self.get_random_row_action(row_coord)
             else:
-                return self.get_random_col_action(state)
+                return self.get_random_col_action(col_coord)
         elif all_row_marked:
-            return self.get_random_col_action(state)
+            return self.get_random_col_action(col_coord)
         else:
-            return self.get_random_row_action(state)
+            return self.get_random_row_action(row_coord)
+'''
+'''
 
-    def get_random_row_action(self, state: GameState) -> GameAction:
-        position = self.get_random_position_with_zero_value(state.row_status)
-        return GameAction("row", position)
+    def get_random_row_action(self, row_coord: list) -> GameAction:
+        position = random.randrange(0, len(row_coord))
+        y, x = row_coord[position]
+        return GameAction("row", (y, x))
 
-    def get_random_col_action(self, state: GameState) -> GameAction:
-        position = self.get_random_position_with_zero_value(state.col_status)
-        return GameAction("col", position)
-        
-    def get_random_position_with_zero_value(self, matrix: np.ndarray):
-        [ny, nx] = matrix.shape
 
-        x = -1
-        y = -1
-        valid = False
-        
-        while not valid:
-            x = random.randrange(0, nx)
-            y = random.randrange(0, ny)
-            valid = matrix[y, x] == 0
-        
-        return (x, y)
+    def get_random_col_action(self, col_coord: list) -> GameAction:
+        position = random.randrange(0, len(col_coord))
+        y, x = col_coord[position]
+        return GameAction("col", (y, x))
     
     def get_row_neighbours(self, state: GameState):   
         row_neighbours = []     # nanti isinya list of tuples koordinat row yg bisa dipilih
@@ -70,7 +69,8 @@ class LocalSearchBot(Bot):
                     neighbour = (i,j)
                     col_neighbours.append(neighbour)     
         return col_neighbours
- 
+ '''
+
     def get_possible_actions(self, state: GameState):
         # fungsi untuk menghasilkan aksi-aksi yang mungkin dari state masukan
 
@@ -132,14 +132,18 @@ class LocalSearchBot(Bot):
     # Fungsi Count Box (All Marked)
     def count_box(self, state: GameState):
         count = 0
-
+        player1 = self.is_player1
         ny = len(state.board_status[0]) 
         nx = len(state.board_status)        
 
         for i in range(ny):
             for j in range(nx):
-                if (state.board_status[i, j] == 4) or (state.board_status[i, j] == -4):
-                    count += 1 
+                if (player1):
+                    if (state.board_status[i,j] == -4):
+                        count += 1
+                else:
+                    if (state.board_status[i,j] == 4):
+                        count += 1
         
         return count
 
