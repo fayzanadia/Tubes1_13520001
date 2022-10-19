@@ -88,7 +88,6 @@ class LocalSearchBot(Bot):
         
         return count
 
-
     def count_box_almost_bool(self, state: GameState):
         [ny, nx] = state.board_status.shape       
 
@@ -98,37 +97,6 @@ class LocalSearchBot(Bot):
                     return True
         
         return False
-
-
-    # Fungsi Count Box (Else Marked)
-    def count_box_else(self, state: GameState):
-        count = 0
-        [ny, nx] = state.board_status.shape       
-
-        for i in range(ny):
-            for j in range(nx):
-                if (state.board_status[i, j] != 3) or (state.board_status[i, j] != 4) or (state.board_status[i, j] != -3) or (state.board_status[i, j] != -4):
-                    count += 1 
-        
-        return count
-
-
-    # Fungsi Value Calculation
-    # +2 / every box created
-    # -1 / every three marked line created per box
-    def calculate_value(self, state: GameState):
-        value = 0
-        
-        count_box_current = self.count_box(state)
-        count_box_current_else = self.count_box_else(state)
-        count_box_current_almost = self.count_box_almost(state)
-
-        value += 3 * (count_box_current)
-        value += 2 * (count_box_current_else)
-        value += 1 * (count_box_current_almost)
-
-        return value
-
 
     def local_search(self, state: GameState) -> GameAction:
         possible_actions = self.get_possible_actions(state)
