@@ -62,7 +62,7 @@ class LocalSearchBot(Bot):
         for i in range(ny):       
             for j in range(nx):
                 if (state.row_status[i,j] == 0):
-                    neighbour = state.row_status[i,j]
+                    neighbour = (i,j)
                     row_neighbours.append(neighbour)
                     
         return row_neighbours
@@ -77,7 +77,7 @@ class LocalSearchBot(Bot):
         for i in range(ny):       
             for j in range(nx):
                 if (state.col_status[i,j] == 0):
-                    neighbour = state.col_status[i,j]
+                    neighbour = (i,j)
                     col_neighbours.append(neighbour)
                     
         return col_neighbours
