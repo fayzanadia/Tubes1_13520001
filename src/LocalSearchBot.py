@@ -1,4 +1,3 @@
-from ast import Return
 from Bot import Bot
 from GameAction import GameAction
 from GameState import GameState
@@ -53,63 +52,56 @@ class LocalSearchBot(Bot):
         return (x, y)
  
     
-    def get_row_neighbours(self, state: GameState):
-        #all_row_not_marked = np.all(state.row_status == 0)     
+    def get_row_neighbours(self, state: GameState):   
         row_neighbours = []     # nanti isinya list of tuples koordinat row yg bisa dipilih
- 
         [ny, nx] = state.row_status.shape
-        
         for i in range(ny):       
             for j in range(nx):
                 if (state.row_status[i,j] == 0):
                     neighbour = (i,j)
-                    row_neighbours.append(neighbour)
-                    
+                    row_neighbours.append(neighbour)       
         return row_neighbours
     
-    
-    def get_col_neighbours(self, state: GameState):
-        #all_col_not_marked = np.all(state.col_status == 0)     
+    def get_col_neighbours(self, state: GameState):   
         col_neighbours = []     # nanti isinya list of tuples koordinat col yg bisa dipilih
- 
         [ny, nx] = state.col_status.shape
-        
         for i in range(ny):       
             for j in range(nx):
                 if (state.col_status[i,j] == 0):
                     neighbour = (i,j)
-                    col_neighbours.append(neighbour)
-                    
+                    col_neighbours.append(neighbour)     
         return col_neighbours
  
     def get_next_random_state(self, state: GameState):
-        return
+        
+        return GameState
     
-    def calculate_value(self, state: GameState, curr_state: GameState):
-        return
+    # Fungsi Heuristic
+    # If state value tidak lebih besar dari current then randomize state
+    def calculate_value(self, state: GameState):
+        heuristic_value = 0
+        
+        return heuristic_value
  
-    def get_best_neighbour(self, state: GameState, curr_state: GameState, row_neighbours: list, col_neighbours: list):
-        return
-    
-    def local_search(self, state: GameState):
-        current_state = get_next_random_state(state)
-        current_value = calculate_value(state, current_state)
-        row_neighbours = get_row_neighbours(current_state)
-        col_neighbours = get_col_neighbours(current_state)
-        best_neighbour, best_neighbour_value = get_best_neighbour(state, current_state, row_neighbours, col_neighbours)
+    def get_best_neighbour(self, state: GameState, row_neighbours: list, col_neighbours: list):
+        '''
+        current_value = self.calculate_value(state)
         
         while (best_neighbour_value >= current_value):
            current_state = best_neighbour
            current_value = best_neighbour_value
-           row_neighbours = get_row_neighbours(current_state)
-           col_neighbours = get_col_neighbours(current_state)
-           best_neighbour, best_neighbour_value = get_best_neighbour(state, current_state, row_neighbours, col_neighbours)
-        
-        return current_state, current_value
+           row_neighbours = self.get_row_neighbours(current_state)
+           col_neighbours = self.get_col_neighbours(current_state)
+           best_neighbour, best_neighbour_value = self.get_best_neighbour(state, current_state, row_neighbours, col_neighbours)
+        '''
+        return GameState, int
+    
+    def local_search(self, state: GameState):
+        row_neighbours = self.get_row_neighbours(state)
+        col_neighbours = self.get_col_neighbours(state)
+        best_neighbour, best_neighbour_value = self.get_best_neighbour(state, row_neighbours, col_neighbours)
+        return best_neighbour, best_neighbour_value
 
-
-    # Fungsi Heuristic
-    # If state value tidak lebih besar dari current then randomize state
     
     # Fungsi Randomize State
     # Use only when semua state value sama aja
