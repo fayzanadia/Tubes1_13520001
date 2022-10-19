@@ -7,11 +7,12 @@ from tkinter import *
 import numpy as np
 from typing import Optional
 from Bot import Bot
-from MinimaxBot import MinimaxBot
 from GameState import GameState
 
 # * Import your bot
 from RandomBot import RandomBot
+from MinimaxBot import MinimaxBot
+from LocalSearchBot import LocalSearchBot
 
 size_of_board = 600
 number_of_dots = 4
@@ -305,7 +306,9 @@ class Dots_and_Boxes():
             self.col_status.copy(),
             self.player1_turn
         ))
-
+        print()
+        print(action)
+        print()
         self.update(action.action_type, action.position)
 
 if __name__ == "__main__":
@@ -315,5 +318,5 @@ if __name__ == "__main__":
     PvB mode: game_instance = Dots_and_Boxes(None, BotName()) or game_instance = Dots_and_Boxes(BotName(), None)
     BvB mode: game_instance = Dots_and_Boxes(BotName(), BotName())
     """
-    game_instance = Dots_and_Boxes(None, MinimaxBot(False))
+    game_instance = Dots_and_Boxes(None, LocalSearchBot(False))
     game_instance.mainloop()
