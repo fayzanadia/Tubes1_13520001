@@ -50,7 +50,6 @@ class LocalSearchBot(Bot):
             valid = matrix[y, x] == 0
         
         return (x, y)
- 
     
     def get_row_neighbours(self, state: GameState):   
         row_neighbours = []     # nanti isinya list of tuples koordinat row yg bisa dipilih
@@ -72,28 +71,124 @@ class LocalSearchBot(Bot):
                     col_neighbours.append(neighbour)     
         return col_neighbours
  
+    def get_possible_actions(self, state: GameState):
+        # fungsi untuk menghasilkan aksi-aksi yang mungkin dari state masukan
+
+        ny = len(state.board_status[0]) # jumlah kotak dalam satu baris
+        nx = len(state.board_status) # jumlah kotak dalam satu kolom matriks
+
+        possible_actions = []
+        empty_rows = [(x, y) for y in range(ny + 1) for x in range(nx) if state.row_status[y,x] == 0]
+        for row in empty_rows:
+            possible_actions.insert(len(possible_actions), GameAction("row", row))
+        
+        empty_cols = [(x, y) for y in range(ny) for x in range(nx + 1) if state.col_status[y,x] == 0]
+        for col in empty_cols:
+            possible_actions.insert(len(possible_actions), GameAction("col", col))
+
+        return possible_actions
+
+    def get_state_from_action(self, state: GameState, action: GameAction) -> GameState:
+        # fungsi untuk menghasilkan state dari sebuah aksi yang dilakukan
+        # berdasarkan fungsi update_board dari main.py
+        new_state = GameState(state.board_status.copy(), state.row_status.copy(), state.col_status.copy(), state.player1_turn) # copy dari current game state
+
+        point_scored = False
+
+        ny = len(state.board_status[0]) # jumlah kotak dalam satu baris
+        nx = len(state.board_status) # jumlah kotak dalam satu kolom matriks
+        x, y = action.position
+
+        if new_state.player1_turn:
+            player_modifier = -1
+        else:
+            player_modifier = 1
+            
+        if (y < ny) and (x < nx):
+            new_state.board_status[y,x] = (abs(new_state.board_status[y,x]) + 1) * player_modifier
+            if abs(new_state.board_status[y,x]) == 4:
+                point_scored = True
+
+        if (action.action_type == 'row'):
+            new_state.row_status[y,x] = 1
+            if y >= 1:
+                new_state.board_status[y-1,x] = (abs(new_state.board_status[y-1,x]) + 1) * player_modifier
+                if abs(new_state.board_status[y-1,x]) == 4:
+                    point_scored = True
+
+        elif (action.action_type == 'col'):
+            new_state.col_status[y,x] = 1
+            if x >= 1:
+                new_state.board_status[y,x-1] = (abs(new_state.board_status[y,x-1]) + 1) * player_modifier
+                if abs(new_state.board_status[y,x-1]) == 4:
+                    point_scored = True
+        
+        return new_state, point_scored
+
     def get_next_random_state(self, state: GameState):
         
         return GameState
     
-    # Fungsi Heuristic
-    # If state value tidak lebih besar dari current then randomize state
-    def calculate_value(self, state: GameState):
-        heuristic_value = 0
+    # Fungsi Count Box (All Marked)
+    def count_box(self, state: GameState):
+        count = 0
+
+        ny = len(state.board_status[0]) 
+        nx = len(state.board_status)        
+
+        for i in range(ny):
+            for j in range(nx):
+                if (state.board_status[i, j] == 4) or (state.board_status[i, j] == -4):
+                    count += 1 
         
-        return heuristic_value
+        return count
+
+    # Fungsi Count Box (Three Marked)
+    def count_box_almost(self, state: GameState):
+        count = 0
+
+        ny = len(state.board_status[0]) 
+        nx = len(state.board_status)        
+
+        for i in range(ny):
+            for j in range(nx):
+                if (state.board_status[i, j] == 3):
+                    count += 1 
+        
+        return count
+
+    # Fungsi Value Calculation
+    # +2 / every box created
+    # -1 / every three marked line created per box
+    def calculate_value(self, state: GameState, next_state: GameState):
+        value = 0
+        
+        count_box_current = self.count_box(state)
+        count_box_next = self.count_box(next_state)
+        count_box_next_almost = self.count_box_almost(next_state)
+
+        if (count_box_next > count_box_current):
+            value += 2 * (count_box_next - count_box_current)
+        
+        value -= count_box_next_almost
+
+        return value
  
     def get_best_neighbour(self, state: GameState, row_neighbours: list, col_neighbours: list):
-        '''
-        current_value = self.calculate_value(state)
+        possible_actions = self.get_possible_actions(state)
+        possible_states = []
+
+        for i in range(len(possible_actions)):
+            possible_states.append(self.get_state_from_action(state, possible_actions[i]))
         
-        while (best_neighbour_value >= current_value):
-           current_state = best_neighbour
-           current_value = best_neighbour_value
-           row_neighbours = self.get_row_neighbours(current_state)
-           col_neighbours = self.get_col_neighbours(current_state)
-           best_neighbour, best_neighbour_value = self.get_best_neighbour(state, current_state, row_neighbours, col_neighbours)
-        '''
+
+        # Data Structure = array[possible_action, score]
+        possible_values = []
+        for i in range(len(possible_states)):
+            value = self.calculate_value(state, possible_states[i])
+            possible_values.append(tuple(possible_actions[i], value))
+
+
         return GameState, int
     
     def local_search(self, state: GameState):
@@ -101,26 +196,6 @@ class LocalSearchBot(Bot):
         col_neighbours = self.get_col_neighbours(state)
         best_neighbour, best_neighbour_value = self.get_best_neighbour(state, row_neighbours, col_neighbours)
         return best_neighbour, best_neighbour_value
-
-    
-    # Fungsi Randomize State
-    # Use only when semua state value sama aja
-
-    # Fungsi State Value
-    def count_value(self, state: GameState):
-        # Priority:
-        # 1. Long chain
-        #    a. Even # of long chains = 1st player win
-        #       Achievable by making side chain
-        #    b. Odd # of long chains = 2nd player win
-        #       Achievable by makin center chain (avoid side chain)
-        # 2. 3 lines
-        # 3. Empty box
-        return
-
-    # ############################
-    # LONG CHAIN FUNCTION
-    # ############################
 
     # Fungsi Empty Box Side
     # Returns an array of box side status in the order of (Top, Left, Right, Bottom)
@@ -171,24 +246,3 @@ class LocalSearchBot(Bot):
                     return True
         else:
             return False
-
-
-    # Fungsi Long Chain Checker
-    # Returns true if current box chain in the board is advantageous to player
-    def is_box_chain(self, state: GameState):
-        
-        [ny, nx] = state.board_status.shape
-        
-        # Loop Checker
-        count_box_checked = 0
-        count_box_marked_3 = 0
-
-        # for i in range(ny):
-        #     for j in range(nx):
-                
-
-
-        # Final Checker
-        if (count_box_checked > 2) and (count_box_marked_3 > 0):
-            return True
-        return False
