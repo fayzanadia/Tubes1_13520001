@@ -9,25 +9,13 @@ class LocalSearchBot(Bot):
         self.is_player1 = is_player1 # True jika bot adalah player 1
     
     def get_action(self, state: GameState) -> GameAction:
-        all_row_marked = np.all(state.row_status == 1)
-        all_col_marked = np.all(state.col_status == 1)
-
-        if not (all_row_marked or all_col_marked):
-            return self.local_search(state)
-#        else:
-#            return self.get_random_row_action(state)
-
-    def get_random_action(self, poss_act: list) -> GameAction:
-        position = random.randrange(0, len(poss_act))
-        y, x = poss_act[position]
-        return GameAction
+        return self.local_search(state)
 
     def get_possible_actions(self, state: GameState):
         # fungsi untuk menghasilkan aksi-aksi yang mungkin dari state masukan
-
         [ny, nx] = state.board_status.shape
-
         possible_actions = []
+        
         empty_rows = [(x, y) for y in range(ny + 1) for x in range(nx) if state.row_status[y,x] == 0]
         for row in empty_rows:
             possible_actions.insert(len(possible_actions), GameAction("row", row))
@@ -43,8 +31,6 @@ class LocalSearchBot(Bot):
         # berdasarkan fungsi update_board dari main.py
         new_state = GameState(state.board_status.copy(), state.row_status.copy(), state.col_status.copy(), state.player1_turn) # copy dari current game state
 
-        point_scored = False
-
         [ny, nx] = state.board_status.shape
         x, y = action.position
 
@@ -55,24 +41,18 @@ class LocalSearchBot(Bot):
             
         if (y < ny) and (x < nx):
             new_state.board_status[y,x] = (abs(new_state.board_status[y,x]) + 1) * player_modifier
-            if abs(new_state.board_status[y,x]) == 4:
-                point_scored = True
 
         if (action.action_type == 'row'):
             new_state.row_status[y,x] = 1
             if y >= 1:
                 new_state.board_status[y-1,x] = (abs(new_state.board_status[y-1,x]) + 1) * player_modifier
-                if abs(new_state.board_status[y-1,x]) == 4:
-                    point_scored = True
 
         elif (action.action_type == 'col'):
             new_state.col_status[y,x] = 1
             if x >= 1:
                 new_state.board_status[y,x-1] = (abs(new_state.board_status[y,x-1]) + 1) * player_modifier
-                if abs(new_state.board_status[y,x-1]) == 4:
-                    point_scored = True
         
-        return new_state#, point_scored
+        return new_state
     
     # Fungsi Count Box (All Marked)
     def count_box(self, state: GameState):
@@ -94,7 +74,6 @@ class LocalSearchBot(Bot):
     # Fungsi Count Box (Three Marked)
     def count_box_almost(self, state: GameState):
         count = 0
-
         [ny, nx] = state.board_status.shape       
 
         for i in range(ny):
@@ -107,33 +86,23 @@ class LocalSearchBot(Bot):
     # Fungsi Value Calculation
     # +2 / every box created
     # -1 / every three marked line created per box
-
-    def calculate_value(self, state: GameState, next_state: GameState):
-        value = 0
-        
-        count_box_current = self.count_box(state)
-        count_box_next = self.count_box(next_state)
-        count_box_next_almost = self.count_box_almost(next_state)
-
-        if (count_box_next > count_box_current):
-            value += 2 * (count_box_next - count_box_current)
-        
-        value -= count_box_next_almost
-
-        return value
-
-    def calculate_value_fixbanget(self, state: GameState):
+    def calculate_value(self, state: GameState):
         value = 0
         
         count_box_current = self.count_box(state)
         count_box_current_almost = self.count_box_almost(state)
 
         value += 2 * (count_box_current)
-        
         value -= count_box_current_almost
 
         return value
-
+    
+    #placeholder bentar
+    def get_random_action(self, poss_act: list) -> GameAction:
+        position = random.randrange(0, len(poss_act))
+        y, x = poss_act[position]
+        return GameAction
+    
     def local_search(self, state: GameState) -> GameAction:
         possible_actions = self.get_possible_actions(state)
         possible_states = []
@@ -141,16 +110,13 @@ class LocalSearchBot(Bot):
         for i in range(len(possible_actions)):
             possible_states.append(self.get_state_from_action(state, possible_actions[i]))
         
-        value = self.calculate_value_fixbanget(state)
+        value = self.calculate_value(state)
         idx_poss_state = 0
-        print(possible_actions)
-        print()
+
         for i in range(len(possible_states)):
-            next_value = self.calculate_value_fixbanget(possible_states[i])
+            next_value = self.calculate_value(possible_states[i])
             if (next_value >= value):
                 value = next_value
                 idx_poss_state = i      # ambil index terakhir kalau ada yg valuenya sama
-        print()
-        print(possible_actions[idx_poss_state])
-        print()
+
         return possible_actions[idx_poss_state]

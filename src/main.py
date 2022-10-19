@@ -306,9 +306,7 @@ class Dots_and_Boxes():
             self.col_status.copy(),
             self.player1_turn
         ))
-        print()
-        print(action)
-        print()
+
         self.update(action.action_type, action.position)
 
 if __name__ == "__main__":
@@ -320,3 +318,4 @@ if __name__ == "__main__":
     """
     game_instance = Dots_and_Boxes(None, LocalSearchBot(False))
     game_instance.mainloop()
+    
