@@ -8,8 +8,10 @@ class LocalSearchBot(Bot):
     def __init__(self, is_player1: bool):
         self.is_player1 = is_player1 # True jika bot adalah player 1
     
+    
     def get_action(self, state: GameState) -> GameAction:
         return self.local_search(state)
+
 
     def get_possible_actions(self, state: GameState):
         # fungsi untuk menghasilkan aksi-aksi yang mungkin dari state masukan
@@ -25,6 +27,7 @@ class LocalSearchBot(Bot):
             possible_actions.insert(len(possible_actions), GameAction("col", col))
 
         return possible_actions
+
 
     def get_state_from_action(self, state: GameState, action: GameAction) -> GameState:
         # fungsi untuk menghasilkan state dari sebuah aksi yang dilakukan
@@ -54,6 +57,7 @@ class LocalSearchBot(Bot):
         
         return new_state
     
+    
     # Fungsi Count Box (All Marked)
     def count_box(self, state: GameState):
         count = 0
@@ -63,13 +67,14 @@ class LocalSearchBot(Bot):
         for i in range(ny):
             for j in range(nx):
                 if (player1):
-                    if (state.board_status[i,j] == -4):
-                        count += 1
+                   if (state.board_status[i,j] == -4):
+                       count += 1
                 else:
-                    if (state.board_status[i,j] == 4):
-                        count += 1
+                   if (state.board_status[i,j] == 4):
+                       count += 1
         
         return count
+
 
     # Fungsi Count Box (Three Marked)
     def count_box_almost(self, state: GameState):
@@ -78,10 +83,35 @@ class LocalSearchBot(Bot):
 
         for i in range(ny):
             for j in range(nx):
-                if (state.board_status[i, j] == 3):
+                if (state.board_status[i, j] == 3) or (state.board_status[i, j] == -3):
                     count += 1 
         
         return count
+
+
+    def count_box_almost_bool(self, state: GameState):
+        [ny, nx] = state.board_status.shape       
+
+        for i in range(ny):
+            for j in range(nx):
+                if (state.board_status[i, j] == 3) or (state.board_status[i, j] == -3):
+                    return True
+        
+        return False
+
+
+    # Fungsi Count Box (Else Marked)
+    def count_box_else(self, state: GameState):
+        count = 0
+        [ny, nx] = state.board_status.shape       
+
+        for i in range(ny):
+            for j in range(nx):
+                if (state.board_status[i, j] != 3) or (state.board_status[i, j] != 4) or (state.board_status[i, j] != -3) or (state.board_status[i, j] != -4):
+                    count += 1 
+        
+        return count
+
 
     # Fungsi Value Calculation
     # +2 / every box created
@@ -90,19 +120,16 @@ class LocalSearchBot(Bot):
         value = 0
         
         count_box_current = self.count_box(state)
+        count_box_current_else = self.count_box_else(state)
         count_box_current_almost = self.count_box_almost(state)
 
-        value += 2 * (count_box_current)
-        value -= count_box_current_almost
+        value += 3 * (count_box_current)
+        value += 2 * (count_box_current_else)
+        value += 1 * (count_box_current_almost)
 
         return value
-    
-    #placeholder bentar
-    def get_random_action(self, poss_act: list) -> GameAction:
-        position = random.randrange(0, len(poss_act))
-        y, x = poss_act[position]
-        return GameAction
-    
+
+
     def local_search(self, state: GameState) -> GameAction:
         possible_actions = self.get_possible_actions(state)
         possible_states = []
@@ -110,13 +137,43 @@ class LocalSearchBot(Bot):
         for i in range(len(possible_actions)):
             possible_states.append(self.get_state_from_action(state, possible_actions[i]))
         
-        value = self.calculate_value(state)
-        idx_poss_state = 0
+        value = self.count_box(state)
+        idx_poss_state = []
+        idx_poss_val = []
+        idx_box_almost = []
 
         for i in range(len(possible_states)):
-            next_value = self.calculate_value(possible_states[i])
+            next_value = self.count_box(possible_states[i])
+            is_almost = self.count_box_almost_bool(possible_states[i])
             if (next_value >= value):
-                value = next_value
-                idx_poss_state = i      # ambil index terakhir kalau ada yg valuenya sama
+                if (is_almost):
+                    idx_box_almost.append(i)
+                idx_poss_state.append(i)
+                idx_poss_val.append(next_value)
 
-        return possible_actions[idx_poss_state]
+        is_all_almost = True
+        for i in range(len(idx_poss_state)):
+            if (idx_poss_state[i] not in idx_box_almost):
+                is_all_almost = False
+
+        max_val = max(idx_poss_val)
+        max_val_list = []
+
+        if (is_all_almost):
+            for i in range(len(idx_poss_state)):
+                if (idx_poss_val[i] == max_val):
+                    max_val_list.append(idx_poss_state[i])
+            if (len(max_val_list) > 1):                
+                idx_action = random.choice(max_val_list)
+            else:
+                idx_action = max_val_list[0]
+            return possible_actions[idx_action]
+        else:
+            for i in range(len(idx_poss_state)):
+                if (idx_poss_val[i] == max_val and idx_poss_state[i] not in idx_box_almost):
+                    max_val_list.append(idx_poss_state[i])
+            if (len(max_val_list) > 1):                
+                idx_action = random.choice(max_val_list)
+            else:
+                idx_action = max_val_list[0]
+            return possible_actions[idx_action]
