@@ -1,3 +1,4 @@
+from ast import Return
 from Bot import Bot
 from GameAction import GameAction
 from GameState import GameState
@@ -80,6 +81,28 @@ class LocalSearchBot(Bot):
                     col_neighbours.append(neighbour)
                     
         return col_neighbours
+ 
+    def get_next_random_state(self, state: GameState):
+        return
+    
+    def calculate_value(self, state: GameState, curr_state: GameState):
+        return
+ 
+    def get_best_neighbour(self, state: GameState, curr_state: GameState, row_neighbours: list, col_neighbours: list):
+        return
     
     def local_search(self, state: GameState):
-        return
+        current_state = get_next_random_state(state)
+        current_value = calculate_value(state, current_state)
+        row_neighbours = get_row_neighbours(current_state)
+        col_neighbours = get_col_neighbours(current_state)
+        best_neighbour, best_neighbour_value = get_best_neighbour(state, current_state, row_neighbours, col_neighbours)
+        
+        while (best_neighbour_value >= current_value):
+           current_state = best_neighbour
+           current_value = best_neighbour_value
+           row_neighbours = get_row_neighbours(current_state)
+           col_neighbours = get_col_neighbours(current_state)
+           best_neighbour, best_neighbour_value = get_best_neighbour(state, current_state, row_neighbours, col_neighbours)
+        
+        return current_state, current_value
