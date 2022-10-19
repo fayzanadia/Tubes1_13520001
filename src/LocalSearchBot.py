@@ -106,3 +106,97 @@ class LocalSearchBot(Bot):
            best_neighbour, best_neighbour_value = get_best_neighbour(state, current_state, row_neighbours, col_neighbours)
         
         return current_state, current_value
+
+
+    # Fungsi Heuristic
+    # If state value tidak lebih besar dari current then randomize state
+    
+    # Fungsi Randomize State
+    # Use only when semua state value sama aja
+
+    # Fungsi State Value
+    def count_value(self, state: GameState):
+        # Priority:
+        # 1. Long chain
+        #    a. Even # of long chains = 1st player win
+        #       Achievable by making side chain
+        #    b. Odd # of long chains = 2nd player win
+        #       Achievable by makin center chain (avoid side chain)
+        # 2. 3 lines
+        # 3. Empty box
+        return
+
+    # ############################
+    # LONG CHAIN FUNCTION
+    # ############################
+
+    # Fungsi Empty Box Side
+    # Returns an array of box side status in the order of (Top, Left, Right, Bottom)
+    # True if empty and false if marked
+    def empty_box_side(self, state: GameState, y: int, x: int):
+        if (state.board_status[y, x] == 4) or (state.board_status[y, x] == -4):
+            return [False, False, False, False]
+        else:
+            top_status, left_status, right_status, bottom_status = True
+            if (state.col_status[y, x] == 1):
+                top_status = False
+            if (state.col_status[y + 1, x] == 1):
+                bottom_status = False
+            if (state.row_status[y, x] == 1):
+                left_status = False
+            if (state.row_status[y, x + 1] == 1):
+                right_status = False
+            return [top_status, left_status, right_status, bottom_status]
+
+
+    # Fungsi Count Marked
+    # Returns numbers of marked side in one box
+    def count_marked(self, box_side):
+        count = 0
+        for i in range(len(box_side)):
+            if (box_side[i] == False):
+                count += 1
+        return count
+
+
+    # Fungsi Adjacent Boxes
+    # Returns true if two boxes are adjacent
+    def is_adjacent(self, state: GameState, y1, x1, y2, x2):
+        box_side_1 = self.empty_box_side(state, y1, x1)
+        box_side_2 = self.empty_box_side(state, y2, x2)
+
+        count_marked_1 = self.count_marked(box_side_1)
+        count_marked_2 = self.count_marked(box_side_2)
+
+        if (count_marked_1 >= 2) and (count_marked_2 >= 2):
+            # One row
+            if (y1 == y2) and ((x1 - x2 == 1) or (x1 - x2 == -1)):
+                if ((x1 < x2) and (state.col_status[x2] == 0)) or ((x1 > x2) and (state.col_status[x1] == 0)):
+                    return True
+            # One col
+            if (x1 == x2) and ((y1 - y2 == 1) or (y1 - y2 == -1)):
+                if ((y1 < y2) and (state.row_status[y2] == 0)) or ((y1 > y2) and (state.row_status[y1] == 0)):
+                    return True
+        else:
+            return False
+
+
+    # Fungsi Long Chain Checker
+    # Returns true if current box chain in the board is advantageous to player
+    def is_box_chain(self, state: GameState):
+        
+        [ny, nx] = state.board_status.shape
+        
+        # Loop Checker
+        count_box_checked = 0
+        count_box_marked_3 = 0
+
+        # for i in range(ny):
+        #     for j in range(nx):
+                
+
+
+        # Final Checker
+        if (count_box_checked > 2) and (count_box_marked_3 > 0):
+            return True
+        return False
