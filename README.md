@@ -31,6 +31,12 @@ Program ini memiliki beberapa fitur, yaitu:
 
 ## Daftar File
 - main.py
+- MinimaxBot.py
+- LocalSearchBot.py
+- GameState.py
+- GameAction.py
+- Bot.py
+- RandomBot.py
 
 ## Penggunaan
 1. Run program main.py
