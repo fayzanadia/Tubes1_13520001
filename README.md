@@ -1,4 +1,4 @@
-# Tugas Besar IF3140 Inteligensi Buatan
+# Tugas Besar IF3170 Inteligensi Buatan
 > Implementasi Minimax Algorithm dan Local Search pada Permainan Dots and Boxes
 
 ## Daftar Isi
@@ -12,7 +12,7 @@
 * [Kontak](#kontak)
 
 ## Informasi Umum
-Program ini dibuat untuk memenuhi tugas Mata Kuliah IF3140 Inteligensi Buatan
+Program ini dibuat untuk memenuhi tugas Mata Kuliah IF3170 Inteligensi Buatan
 
 *Program Studi Teknik Informatika* <br />
 *Sekolah Teknik Elektro dan Informatika* <br />
