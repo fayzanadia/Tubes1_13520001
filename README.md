@@ -47,7 +47,7 @@ _Proyek Selesai_
 
 ## Ruang Perbaikan
 Terdapat hal-hal yang dapat dikembangkan dari proyek ini, diantaranya:
-- Tingkat inteligensi bot
+- Pola pertandingan bot dengan dua algoritma yang berbeda kebanyakan membentuk garis vertikal di awal
 
 ## Kontak
 Dibuat oleh
